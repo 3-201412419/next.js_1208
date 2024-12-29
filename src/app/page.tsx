@@ -13,19 +13,13 @@ interface Game {
   appid: number;
   name: string;
   playtime_forever: number;
-  genres: Genre[];
   header_image: string;
   description: string;
-  review_score: number;
-  total_reviews: number;
-  review_score_desc: string;
-  similar_games: Game[];
-  user_recommendations: {
-    user_id: string;
-    username: string;
-    rating: number;
-    comment: string;
-  }[];
+  genres: { id: string; description: string }[];
+  metacritic?: { score: number };
+  release_date: { coming_soon: boolean; date: string };
+  developers: string[];
+  publishers: string[];
 }
 
 interface UserProfile {
@@ -87,21 +81,21 @@ export default function SteamLibrary() {
   // 정렬된 게임 목록을 반환하는 함수
   const getSortedGames = () => {
     return [...games].sort((a, b) => {
-      switch (sortBy) {
-        case 'playtime':
-          return b.playtime_forever - a.playtime_forever;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'rating':
-          return (b.review_score || 0) - (a.review_score || 0);
-        default:
-          return 0;
+      if (sortBy === 'playtime') {
+        return b.playtime_forever - a.playtime_forever;
       }
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      // rating을 metacritic 점수로 변경
+      return (b.metacritic?.score || 0) - (a.metacritic?.score || 0);
     });
   };
 
   if (loading) return <div className="p-4">로딩 중....</div>;
   if (error) return <div className="p-4">{error}</div>;
+
+  const sortedGames = getSortedGames();
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -180,91 +174,60 @@ export default function SteamLibrary() {
       <div className="mb-4 flex items-center gap-2">
         <span className="text-gray-600">정렬:</span>
         <select
-          className="p-2 border rounded bg-white"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as 'playtime' | 'name' | 'rating')}
+          className="ml-2 p-2 border rounded"
         >
           <option value="playtime">플레이타임순</option>
           <option value="name">이름순</option>
-          <option value="rating">평가순</option>
+          <option value="rating">Metacritic 점수순</option>
         </select>
       </div>
 
       {/* 게임 목록 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {getSortedGames().map((game) => (
-          <div key={game.appid} className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        {sortedGames.map((game) => (
+          <div
+            key={game.appid}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+          >
             {game.header_image && (
-              <img 
-                src={game.header_image} 
-                alt={game.name} 
+              <img
+                src={game.header_image}
+                alt={game.name}
                 className="w-full h-48 object-cover"
               />
             )}
             <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{game.name}</h2>
-              <p className="text-gray-600 mb-2">
-                플레이 시간: {Math.round(game.playtime_forever / 60)}시간
+              <h3 className="text-xl font-bold mb-2">{game.name}</h3>
+              {game.description && (
+                <p className="text-gray-600 mb-2">{game.description}</p>
+              )}
+              <p className="text-gray-500 mb-2">
+                플레이 시간: {Math.round(game.playtime_forever / 60)} 시간
               </p>
               {game.genres && game.genres.length > 0 && (
-                <div className="mb-2">
-                  <p className="text-sm text-gray-500">장르:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {game.genres.map((genre, index) => (
-                      <span 
-                        key={`${game.appid}-${genre.id || `genre-${index}`}`}
-                        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                      >
-                        {genre.description}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {game.description && (
-                <p className="text-sm text-gray-600 mb-2">{game.description}</p>
-              )}
-              {game.review_score_desc && (
-                <div className="mt-2">
-                  <p className="text-sm font-semibold">
-                    평가: {game.review_score_desc}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    총 {game.total_reviews.toLocaleString()}개의 리뷰
-                  </p>
-                </div>
-              )}
-              {/* 게임 추천 섹션 */}
-              <div className="mt-4 border-t pt-4">
-                <h3 className="text-lg font-semibold mb-2">비슷한 게임 추천</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {game.similar_games?.slice(0, 4).map((similar) => (
-                    <div key={`${game.appid}-${similar.appid}`} className="text-sm">
-                      <img
-                        src={similar.header_image}
-                        alt={similar.name}
-                        className="w-full h-20 object-cover rounded"
-                      />
-                      <p className="mt-1 font-medium truncate">{similar.name}</p>
-                    </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {game.genres.map((genre) => (
+                    <span
+                      key={genre.id}
+                      className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                    >
+                      {genre.description}
+                    </span>
                   ))}
                 </div>
-              </div>
-              {/* 다른 사용자 평가 */}
-              <div className="mt-4 border-t pt-4">
-                <h3 className="text-lg font-semibold mb-2">다른 사용자 평가</h3>
-                <div className="space-y-2">
-                  {game.user_recommendations?.slice(0, 3).map((rec) => (
-                    <div key={`${game.appid}-${rec.user_id}`} className="bg-gray-50 p-2 rounded">
-                      <p className="font-medium">{rec.username}</p>
-                      <div className="flex items-center text-yellow-500">
-                        {'★'.repeat(rec.rating)}{'☆'.repeat(5-rec.rating)}
-                      </div>
-                      <p className="text-sm text-gray-600">{rec.comment}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
+              {game.metacritic && (
+                <p className="text-gray-600 mb-2">
+                  Metacritic: {game.metacritic.score}
+                </p>
+              )}
+              {game.developers && (
+                <p className="text-gray-600 text-sm">
+                  개발사: {game.developers.join(', ')}
+                </p>
+              )}
             </div>
           </div>
         ))}
