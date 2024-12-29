@@ -46,18 +46,19 @@ export default function SteamLibrary() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const fetchUserData = async (id: string) => {
+    if (!id) {
+      setError('Steam ID를 입력해주세요');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       // URL 업데이트
-      if (id) {
-        router.push(`?steamId=${id}`);
-      } else {
-        router.push('/');
-      }
+      router.push(`?steamId=${id}`);
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const response = await axios.get(`${baseUrl}/steam/games?steamId=${id}`);
+      const response = await axios.get(`/api/steam/games?steamId=${id}`);
       setGames(response.data.games);
       setUserProfile(response.data.userProfile);
     } catch (err) {
