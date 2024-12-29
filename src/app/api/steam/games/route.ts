@@ -65,8 +65,9 @@ export async function GET(request: Request) {
       );
     }
 
+    // 모든 게임의 상세 정보를 가져옴
     const gamesWithDetails = await Promise.all(
-      games.slice(0, 10).map(async (game: any) => {
+      games.map(async (game: any) => {
         const details = await getGameDetails(game.appid);
         return {
           ...game,
