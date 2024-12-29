@@ -58,11 +58,21 @@ export default function SteamLibrary() {
       // URL 업데이트
       router.push(`?steamId=${id}`);
 
+      console.log('Fetching data for Steam ID:', id);
       const response = await axios.get(`/api/steam/games?steamId=${id}`);
-      setGames(response.data.games);
+      
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+
+      console.log('Data received:', response.data);
+      setGames(response.data.games || []);
       setUserProfile(response.data.userProfile);
-    } catch (err) {
-      setError('게임 목록을 불러오는데 실패했습니다');
+    } catch (err: any) {
+      console.error('Error fetching data:', err);
+      setError(err.response?.data?.error || err.message || '게임 목록을 불러오는데 실패했습니다');
+      setGames([]);
+      setUserProfile(null);
     } finally {
       setLoading(false);
     }
