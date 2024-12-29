@@ -70,11 +70,9 @@ export default function SteamLibrary() {
 
   useEffect(() => {
     const urlSteamId = searchParams.get('steamId');
-    if (urlSteamId !== null) {
+    if (urlSteamId) {
       setSteamId(urlSteamId);
       fetchUserData(urlSteamId);
-    } else {
-      fetchUserData('');
     }
   }, [searchParams]);
 
