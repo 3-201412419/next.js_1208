@@ -56,7 +56,8 @@ export default function SteamLibrary() {
         router.push('/');
       }
 
-      const response = await axios.get(`/steam/games?steamId=${id}`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await axios.get(`${baseUrl}/steam/games?steamId=${id}`);
       setGames(response.data.games);
       setUserProfile(response.data.userProfile);
     } catch (err) {
