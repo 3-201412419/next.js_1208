@@ -42,7 +42,7 @@ export default function SteamLibrary() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'playtime' | 'name' | 'rating'>('playtime');
-  const [steamId, setSteamId] = useState(searchParams.get('steamId') || '');
+  const [steamId, setSteamId] = useState(searchParams.get('steamId') || '76561198392922508');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const fetchUserData = async (id: string) => {
@@ -69,11 +69,9 @@ export default function SteamLibrary() {
   };
 
   useEffect(() => {
-    const urlSteamId = searchParams.get('steamId');
-    if (urlSteamId) {
-      setSteamId(urlSteamId);
-      fetchUserData(urlSteamId);
-    }
+    const urlSteamId = searchParams.get('steamId') || '76561198392922508';
+    setSteamId(urlSteamId);
+    fetchUserData(urlSteamId);
   }, [searchParams]);
 
   // 정렬된 게임 목록을 반환하는 함수
