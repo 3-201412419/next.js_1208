@@ -145,18 +145,18 @@ Response:
 
 ## 라이브 데모
 
-프로젝트는 Vercel에서 호스팅되며, [여기](https://your-project-url.vercel.app)에서 확인할 수 있습니다.
+프로젝트는 Vercel에서 호스팅되며, [여기](https://next-js-1208-5mw56vr16-hea-won-jungs-projects.vercel.app/)에서 확인할 수 있습니다.
 
 ## 스크린샷
 
 ### 메인 페이지
 ![메인 페이지](./screenshots/main.png)
 
-### 게임 상세 정보
+<!-- ### 게임 상세 정보
 ![게임 상세](./screenshots/detail.png)
 
 ### 모바일 뷰
-![모바일 뷰](./screenshots/mobile.png)
+![모바일 뷰](./screenshots/mobile.png) -->
 
 ## 향후 개선 계획
 
